@@ -1,5 +1,12 @@
 package nscherer30.gmail.com.androidphotoalbum11.model;
 
+import android.util.Log;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +15,9 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 473609096067308990L;
 	private String userName;
-	private List<Album> albums;
-	
+	private ArrayList<Album> albums;
+	static String filepath = "C:\\Users\\Nick\\AndroidStudioProjects\\androidphotoalbum11\\app\\src\\main\\java\\nscherer30\\gmail\\com\\androidphotoalbum11\\userList.dat";
+
 	public User(String userName) {
 		this.userName = userName;
 		albums = new ArrayList<Album>();
@@ -19,7 +27,7 @@ public class User implements Serializable {
 		return userName;
 	}
 	
-	public List<Album> getAlbums() {
+	public ArrayList<Album> getAlbums() {
 		return albums;
 	}
 	
@@ -40,7 +48,32 @@ public class User implements Serializable {
 		}
 		return false;
 	}
-	
+
+	public static User read() {
+		User u = null;
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filepath));
+			u = (User) ois.readObject();
+			ois.close();
+		} catch (IOException e) {
+
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return u;
+	}
+
+	public static void write(User u) {
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filepath));
+			oos.writeObject(u);
+			oos.close();
+			Log.d("write", "updated " + u.getUserName() + "user to path " + filepath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public void addAlbum(Album album) {
 		albums.add(album);
 	}

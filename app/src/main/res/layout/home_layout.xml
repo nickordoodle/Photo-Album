@@ -65,6 +65,14 @@
             android:background="@color/colorPrimary"
             android:id="@+id/list" />
 
+        <TextView
+            android:id="@+id/empty"
+            android:text="No items to display"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            />
+
     </LinearLayout>
 
 
