@@ -3,21 +3,18 @@ package nscherer30.gmail.com.androidphotoalbum11.application;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import nscherer30.gmail.com.androidphotoalbum11.R;
 import nscherer30.gmail.com.androidphotoalbum11.model.Album;
@@ -25,20 +22,17 @@ import nscherer30.gmail.com.androidphotoalbum11.model.User;
 
 public class HomeActivity extends Activity {
 
-    Button openAlbumButton;
     Button createAlbumButton;
-    Button renameAlbumButton;
-    Button deleteAlbumButton;
     ListView albumListView;
     View empty;
 
-    User user;
+    static User user;
     ArrayList<Album> albums;
 
     AlbumAdapter albumAdapter;
-    AlertDialog.Builder alert;
 
-    View.OnClickListener dialogListener;
+    View.OnClickListener createDialogListener;
+    AdapterView.OnItemClickListener itemClickListener;
 
     SharedPreferences sharedPref;
 
@@ -97,16 +91,13 @@ public class HomeActivity extends Activity {
 
     private void initLayoutWidgets(){
 
-        openAlbumButton = (Button) findViewById(R.id.openAlbumButton);
         createAlbumButton = (Button) findViewById(R.id.createAlbumButton);
-        renameAlbumButton = (Button) findViewById(R.id.renameAlbumButton);
-        deleteAlbumButton = (Button) findViewById(R.id.deleteAlbumButton);
 
         albumListView = (ListView) findViewById(R.id.list);
 
         empty = findViewById(R.id.empty);
 
-        dialogListener = new View.OnClickListener() {
+        createDialogListener = new View.OnClickListener() {
             public void onClick(View v) {
 
                 final Dialog dialog = new Dialog(HomeActivity.this);
@@ -148,6 +139,82 @@ public class HomeActivity extends Activity {
             }
         };
 
+        itemClickListener = new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+
+                final Dialog dialog = new Dialog(HomeActivity.this);
+                dialog.setContentView(R.layout.item_click_dialog);
+                dialog.setTitle("Open, Edit or Delete Album");
+
+                final EditText value = (EditText) dialog.findViewById(R.id.albumEditText);
+
+                Button openButton = (Button) dialog.findViewById(R.id.openAlbumButton);
+                Button saveButton = (Button) dialog.findViewById(R.id.saveEditButton);
+                Button deleteButton = (Button) dialog.findViewById(R.id.deleteAlbumButton);
+                Button cancelButton = (Button) dialog.findViewById(R.id.cancelButton);
+
+                final String albumName = ((TextView) view).getText().toString();
+                final Album album = user.getAlbum(albumName);
+                value.setText( albumName );
+
+                // if button is clicked, close the custom dialog
+                openButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Intent intent = new Intent(HomeActivity.this, PhotoActivity.class);
+                        intent.putExtra("album", albumName);
+                        intent.putExtra("user", HomeActivity.user);
+                        startActivity(intent);
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        String newAlbumName = value.getText().toString();
+                        album.setName(newAlbumName);
+                        albums.get(i).setName(newAlbumName);
+                        albumAdapter.notifyDataSetChanged();
+                        //Need a write operation here?
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        user.removeAlbum(album);
+                        albums.remove(i);
+                        albumAdapter.notifyDataSetChanged();
+
+                        //write operation?
+                        dialog.dismiss();
+
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                dialog.show();
+            }
+        };
 
 
 
@@ -155,35 +222,9 @@ public class HomeActivity extends Activity {
 
     private void setWidgetActions(){
 
-        openAlbumButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: implement user click actions
-            }
-        });
+        createAlbumButton.setOnClickListener(createDialogListener);
 
-        createAlbumButton.setOnClickListener(dialogListener);
-
-        renameAlbumButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: implement user click actions
-            }
-        });
-
-        deleteAlbumButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: implement user click actions
-            }
-        });
-
-        albumListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-            }
-        });
+        albumListView.setOnItemClickListener(itemClickListener);
 
     }
 }
