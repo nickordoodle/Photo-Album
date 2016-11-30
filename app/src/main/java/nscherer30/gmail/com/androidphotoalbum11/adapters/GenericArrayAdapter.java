@@ -1,4 +1,4 @@
-package nscherer30.gmail.com.androidphotoalbum11.application;
+package nscherer30.gmail.com.androidphotoalbum11.adapters;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +11,8 @@ import java.util.ArrayList;
 public abstract class GenericArrayAdapter<T> extends ArrayAdapter<T> {
 
     // Vars
-    private LayoutInflater mInflater;
-    private ArrayList<T> data;
+    protected LayoutInflater mInflater;
+    protected ArrayList<T> data;
 
     public GenericArrayAdapter(Context context, ArrayList<T> objects) {
         super(context, 0, objects);

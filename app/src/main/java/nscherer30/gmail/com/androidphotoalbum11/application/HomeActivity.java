@@ -15,10 +15,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import nscherer30.gmail.com.androidphotoalbum11.R;
 import nscherer30.gmail.com.androidphotoalbum11.model.Album;
+import nscherer30.gmail.com.androidphotoalbum11.model.Photo;
 import nscherer30.gmail.com.androidphotoalbum11.model.User;
+
+import nscherer30.gmail.com.androidphotoalbum11.adapters.*;
+
+
 
 public class HomeActivity extends Activity {
 
@@ -31,8 +37,8 @@ public class HomeActivity extends Activity {
 
     AlbumAdapter albumAdapter;
 
-    View.OnClickListener createDialogListener;
-    AdapterView.OnItemClickListener itemClickListener;
+    private View.OnClickListener createDialogListener;
+    private AdapterView.OnItemClickListener itemClickListener;
 
     SharedPreferences sharedPref;
 
@@ -114,7 +120,8 @@ public class HomeActivity extends Activity {
                     @Override
                     public void onClick(View v) {
 
-                        Album newAlbum = new Album(value.getText().toString(), null);
+                        List<Photo> emptyList = new ArrayList<Photo>();
+                        Album newAlbum = new Album(value.getText().toString(), emptyList);
                         albums.add(newAlbum);
                         albumAdapter.notifyDataSetChanged();
 
@@ -166,7 +173,6 @@ public class HomeActivity extends Activity {
 
                         Intent intent = new Intent(HomeActivity.this, PhotoActivity.class);
                         intent.putExtra("album", albumName);
-                        intent.putExtra("user", HomeActivity.user);
                         startActivity(intent);
 
                         dialog.dismiss();

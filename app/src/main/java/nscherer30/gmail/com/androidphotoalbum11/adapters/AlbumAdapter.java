@@ -1,7 +1,6 @@
-package nscherer30.gmail.com.androidphotoalbum11.application;
+package nscherer30.gmail.com.androidphotoalbum11.adapters;
 
 import android.content.Context;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
