@@ -1,6 +1,9 @@
 package nscherer30.gmail.com.androidphotoalbum11.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -8,6 +11,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import nscherer30.gmail.com.androidphotoalbum11.application.AlbumSlideshow;
+import nscherer30.gmail.com.androidphotoalbum11.application.PhotoActivity;
 import nscherer30.gmail.com.androidphotoalbum11.model.Album;
 import nscherer30.gmail.com.androidphotoalbum11.model.Photo;
 
@@ -22,9 +27,11 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
 
     private Album album;
     private User user;
+    private Activity activity;
 
-    public PhotoAdapter(Context context, ArrayList<Photo> photos, Album album, User user) {
+    public PhotoAdapter(Activity activity, Context context, ArrayList<Photo> photos, Album album, User user) {
         super(context, photos);
+        this.activity = activity;
         this.album = album;
         this.user = user;
     }
@@ -55,6 +62,16 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
                 album.removePhoto(data.get(position));
                 data.remove(position); //or some other task
                 notifyDataSetChanged();
+            }
+        });
+
+        text.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Context context = getContext();
+                Intent intent = new Intent(context, AlbumSlideshow.class);
+                intent.putExtra("album", album.getName());
+                context.startActivity(intent);
             }
         });
 

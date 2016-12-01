@@ -1,6 +1,7 @@
 package nscherer30.gmail.com.androidphotoalbum11.application;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -49,6 +50,7 @@ public class PhotoActivity extends Activity {
 
         user = HomeActivity.user;
         album = user.getAlbum(getIntent().getStringExtra("album"));
+        Context context = getApplicationContext();
 
         initLayoutWidgets();
         setWidgetActions();
@@ -59,7 +61,7 @@ public class PhotoActivity extends Activity {
             e.printStackTrace();
         }
 
-        photoAdapter = new PhotoAdapter(getApplicationContext(), photos, album, user);
+        photoAdapter = new PhotoAdapter(PhotoActivity.this, context, photos, album, user);
         photoListView.setAdapter(photoAdapter);
 
     }
@@ -118,15 +120,6 @@ public class PhotoActivity extends Activity {
             }
         };
 
-        itemClickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
-
-                Intent intent = new Intent(PhotoActivity.this, AlbumSlideshow.class);
-                intent.putExtra("album", album.getName());
-                startActivity(intent);
-            }
-        };
     }
 
     private void setWidgetActions(){
