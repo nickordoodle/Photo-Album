@@ -1,4 +1,3 @@
 <resources>
-    <string name="app_name">AndroidPhotoAlbum11</string>
-    <string name="title_activity_create_album">CreateAlbum</string>
+    <string name="app_name">PhotoAlbumAndroidApp11</string>
 </resources>
