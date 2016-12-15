@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,7 +15,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.IllegalFormatException;
 
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.HomeActivity;
@@ -32,7 +33,7 @@ public class PhotoActivity extends Activity {
     ListView photoListView;
     Button addPhotoButton;
 
-    ArrayList<Photo> photos;
+    List<Photo> photos;
 
     ArrayAdapter<Photo> photoAdapter;
     private View.OnClickListener addPhotoListener;
@@ -55,7 +56,7 @@ public class PhotoActivity extends Activity {
         setWidgetActions();
 
         try{
-            photos = (ArrayList)album.getPhotos();
+            photos = album.getPhotos();
         } catch (IllegalFormatException e){
             e.printStackTrace();
         }
@@ -79,19 +80,30 @@ public class PhotoActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST)
+        {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                if (data != null)
+                {
+                    try
+                    {
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
 
-            Uri uri = data.getData();
+                        Photo photo = new Photo(bitmap);
+                        album.addPhoto(photo);
+                        photos = album.getPhotos();
+                        photoAdapter.notifyDataSetChanged();
 
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
 
-                //ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                //imageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED)
+            {
             }
         }
     }
@@ -111,11 +123,6 @@ public class PhotoActivity extends Activity {
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-
-                Photo photo = new Photo("test", "test");
-                photos.add(photo);
-                album.addPhoto(photo);
-                photoAdapter.notifyDataSetChanged();
             }
         };
 

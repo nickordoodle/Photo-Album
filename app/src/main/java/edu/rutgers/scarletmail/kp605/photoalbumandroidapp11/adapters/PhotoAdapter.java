@@ -2,15 +2,21 @@ package edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.adapters;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.HomeActivity;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.application.AlbumSlideshow;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.application.PhotoActivity;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Album;
@@ -29,7 +35,7 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
     private User user;
     private Activity activity;
 
-    public PhotoAdapter(Activity activity, Context context, ArrayList<Photo> photos, Album album, User user) {
+    public PhotoAdapter(Activity activity, Context context, List<Photo> photos, Album album, User user) {
         super(context, photos);
         this.activity = activity;
         this.album = album;
@@ -49,10 +55,12 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
             vi = mInflater.inflate(R.layout.photo_row, null);
         TextView text = (TextView) vi.findViewById(R.id.photo_row_text_view);
         Button deleteButton = (Button) vi.findViewById(R.id.photo_row_delete_button);
+        ImageView imageView = (ImageView) vi.findViewById(R.id.photo_row_image_view);
+        imageView.setImageBitmap(data.get(position).getBitmap());
 
-        String caption = data.get(position).getCaption();
+        String caption = data.get(position).getTagsString();
         if(caption != null)
-            text.setText(data.get(position).getCaption());
+            text.setText(data.get(position).getTagsString());
         else
             text.setText("No caption");
 
@@ -60,7 +68,6 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
             @Override
             public void onClick(View v) {
                 album.removePhoto(data.get(position));
-                data.remove(position); //or some other task
                 notifyDataSetChanged();
             }
         });
@@ -70,6 +77,7 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
             public void onClick(View view) {
                 Context context = getContext();
                 Intent intent = new Intent(context, AlbumSlideshow.class);
+                intent.putExtra("photo", position + "");
                 intent.putExtra("album", album.getName());
                 context.startActivity(intent);
             }

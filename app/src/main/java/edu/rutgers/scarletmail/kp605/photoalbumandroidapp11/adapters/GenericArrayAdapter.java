@@ -7,15 +7,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GenericArrayAdapter<T> extends ArrayAdapter<T> {
 
     // Vars
     protected LayoutInflater mInflater;
-    protected ArrayList<T> data;
+    protected List<T> data;
 
-    public GenericArrayAdapter(Context context, ArrayList<T> objects) {
+    public GenericArrayAdapter(Context context, List<T> objects) {
         super(context, 0, objects);
         init(context);
         this.data = objects;

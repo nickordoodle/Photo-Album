@@ -48,57 +48,6 @@ public class Album implements Serializable {
         return photos.size();
     }
 
-    public Photo getOldestPhoto() {
-        if(photos.size() > 0) {
-            Photo oldestPhoto = photos.get(0);
-            for(int i=1; i < photos.size(); i++) {
-                Photo temp = photos.get(i);
-                if(temp.getDate().compareTo(oldestPhoto.getDate()) < 0 ) {
-                    oldestPhoto = temp;
-                }
-            }
-            return oldestPhoto;
-        } else {
-            return null;
-        }
-    }
-
-    public Photo getNewestPhoto() {
-        if(photos.size() > 0) {
-            Photo newestPhoto = photos.get(0);
-            for(int i=1; i < photos.size(); i++) {
-                Photo temp = photos.get(i);
-                if(temp.getDate().compareTo(newestPhoto.getDate()) > 0 ) {
-                    newestPhoto = temp;
-                }
-            }
-            return newestPhoto;
-        } else {
-            return null;
-        }
-    }
-
-    public String getRange() {
-        Photo oldest = getOldestPhoto();
-        Photo newest = getNewestPhoto();
-
-        String oldestDate = (oldest == null ? "N/A" : oldest.getDateString());
-        String newestDate = (newest == null ? "N/A" : newest.getDateString());
-
-        return oldestDate + " - " + newestDate;
-    }
-
-    public int indexOf(Photo photo) {
-        if(photo == null) return -1;
-        for(Photo p : photos) {
-            if(p.getCaption().equals(photo.getCaption())
-                    && p.getDate().equals(photo.getDate())) {
-                return photos.indexOf(p);
-            }
-        }
-        return -1;
-    }
-
     public Photo getPhoto(int index) {
         return photos.get(index);
     }

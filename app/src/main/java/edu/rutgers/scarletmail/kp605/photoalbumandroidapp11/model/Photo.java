@@ -1,5 +1,7 @@
 package edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,40 +11,20 @@ import java.util.List;
 public class Photo implements Serializable {
 
     private static final long serialVersionUID = 473609096067308990L;
-    private String caption;
-    private Calendar date;
-    private String imgPath;
+    private Bitmap bitmap;
     private List<Tag> tags;
 
 
-    public Photo(String caption, String imgPath) {
-        this.caption = caption;
-        this.imgPath = imgPath;
-        date = Calendar.getInstance();
-        date.set(Calendar.MILLISECOND, 0);
+    public Photo(Bitmap bitmap) {
+        this.bitmap = bitmap;
         tags = new ArrayList<Tag>();
 
     }
 
-    public String getCaption() {
-        return caption;
-    }
-
-    public Calendar getDate() {
-        return date;
-    }
-
-    public String getDateString() {
-        String[] temp = date.getTime().toString().split(" ");
-        return temp[1] + " " + temp[2] + " " + temp[5];
-    }
+    public Bitmap getBitmap() { return bitmap; }
 
     public List<Tag> getTags() {
         return tags;
-    }
-
-    public void setCaption(String caption) {
-        this.caption = caption;
     }
 
     public void addTag(Tag tag) {
@@ -51,18 +33,6 @@ public class Photo implements Serializable {
 
     public void removeTag(Tag tag) {
         tags.remove(tag);
-    }
-
-    public String toString() {
-        return caption;
-    }
-
-    public String getImgPath() {
-        return imgPath;
-    }
-
-    public void setImgPath(String imgPath) {
-        this.imgPath = imgPath;
     }
 
     public String getTagsString() {
