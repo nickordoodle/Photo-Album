@@ -15,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,9 +30,14 @@ import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.adapters.PhotoAdapte
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Album;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Photo;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.User;
+import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Tag;
 
 import static android.R.attr.value;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.addButton;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.addTagButton;
 import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.albumName;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.deleteTagButton;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.text;
 
 
 public class AlbumSlideshow extends AppCompatActivity {
@@ -42,6 +50,8 @@ public class AlbumSlideshow extends AppCompatActivity {
     Button movePhotoButton;
     Button nextPhotoButton;
     Button prevPhotoButton;
+    Button addTagButton;
+    Button deleteTagButton;
 
     List<Photo> photos;
 
@@ -49,9 +59,12 @@ public class AlbumSlideshow extends AppCompatActivity {
     private View.OnClickListener prevClickListener;
     private View.OnClickListener nextClickListener;
     private View.OnClickListener moveClickListener;
+    private View.OnClickListener addTagClickListener;
+    private View.OnClickListener deleteTagClickListener;
     private AdapterView.OnItemClickListener itemClickListener;
 
     ImageView imageView;
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +79,10 @@ public class AlbumSlideshow extends AppCompatActivity {
 
         ImageView imageView = (ImageView) findViewById(R.id.slideshow_image_view);
         imageView.setImageBitmap(album.getPhoto(index).getBitmap());
+
+        TextView textView = (TextView) findViewById(R.id.tagsView);
+        textView.setText(album.getPhoto(index).getTagsString());
+
         initLayoutWidgets();
         setWidgetActions();
 
@@ -87,6 +104,10 @@ public class AlbumSlideshow extends AppCompatActivity {
 
         movePhotoButton = (Button) findViewById(R.id.movePhotoButton);
 
+        addTagButton = (Button) findViewById(R.id.addTagButton);
+
+        deleteTagButton = (Button) findViewById(R.id.deleteTagButton);
+
         imageView = (ImageView) findViewById(R.id.slideshow_image_view);
 
         prevClickListener = new View.OnClickListener() {
@@ -94,6 +115,7 @@ public class AlbumSlideshow extends AppCompatActivity {
                 if(index > 0) {
                     index = index - 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
+                    textView.setText(album.getPhoto(index).getTagsString());
                 }
             }
         };
@@ -103,7 +125,113 @@ public class AlbumSlideshow extends AppCompatActivity {
                 if(index < album.getAmountOfPhotos()-1) {
                     index = index + 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
+                    textView.setText(album.getPhoto(index).getTagsString());
                 }
+            }
+        };
+
+        addTagClickListener = new View.OnClickListener() {
+            public void onClick(View v) {
+
+                final Dialog dialog = new Dialog(AlbumSlideshow.this);
+                dialog.setContentView(R.layout.add_tag_dialog);
+                dialog.setTitle("Add Tag");
+
+                Button addButton = (Button) dialog.findViewById(R.id.addButton);
+                Button cancelButton = (Button) dialog.findViewById(R.id.cancelButton);
+                final Spinner dropdown = (Spinner) dialog.findViewById(R.id.spinner);
+                final EditText value = (EditText) dialog.findViewById(R.id.tagText);
+
+                List<String> list = new ArrayList<String>();
+                list.add("location");
+                list.add("person");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AlbumSlideshow.this, android.R.layout.simple_spinner_item, list);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                dropdown.setAdapter(adapter);
+
+                // if button is clicked, close the custom dialog
+                addButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Tag tag = new Tag(String.valueOf(dropdown.getSelectedItem()), value.getText().toString());
+                        user.getAlbum(album.getName()).getPhoto(index).addTag(tag);
+                        album = user.getAlbum(album.getName());
+                        photos = album.getPhotos();
+
+                        User.write(user, path);
+
+                        dialog.dismiss();
+                        Context context = getApplicationContext();
+                        Intent intent = new Intent(context, AlbumSlideshow.class);
+                        intent.putExtra("photo", index + "");
+                        intent.putExtra("album", album.getName());
+                        context.startActivity(intent);
+
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                dialog.show();
+            }
+        };
+
+        deleteTagClickListener = new View.OnClickListener() {
+            public void onClick(View v) {
+
+                final Dialog dialog = new Dialog(AlbumSlideshow.this);
+                dialog.setContentView(R.layout.delete_tag_dialog);
+                dialog.setTitle("Delete Tag");
+
+                Button deleteButton = (Button) dialog.findViewById(R.id.deleteButton);
+                Button cancelButton = (Button) dialog.findViewById(R.id.cancelButton);
+                final Spinner dropdown = (Spinner) dialog.findViewById(R.id.spinner);
+
+                List<Tag> list = album.getPhoto(index).getTags();
+
+                ArrayAdapter<Tag> adapter = new ArrayAdapter<Tag>(AlbumSlideshow.this, android.R.layout.simple_spinner_item, list);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                dropdown.setAdapter(adapter);
+
+                // if button is clicked, close the custom dialog
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Tag tag = (Tag) dropdown.getSelectedItem();
+                        user.getAlbum(album.getName()).getPhoto(index).removeTag(tag);
+                        album = user.getAlbum(album.getName());
+                        photos = album.getPhotos();
+
+                        User.write(user, path);
+
+                        dialog.dismiss();
+                        Context context = getApplicationContext();
+                        Intent intent = new Intent(context, AlbumSlideshow.class);
+                        intent.putExtra("photo", index + "");
+                        intent.putExtra("album", album.getName());
+                        context.startActivity(intent);
+
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                dialog.show();
             }
         };
 
@@ -171,6 +299,8 @@ public class AlbumSlideshow extends AppCompatActivity {
         prevPhotoButton.setOnClickListener(prevClickListener);
         nextPhotoButton.setOnClickListener(nextClickListener);
         movePhotoButton.setOnClickListener(moveClickListener);
+        addTagButton.setOnClickListener(addTagClickListener);
+        deleteTagButton.setOnClickListener(deleteTagClickListener);
 
     }
 

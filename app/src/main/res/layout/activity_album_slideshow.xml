@@ -24,6 +24,13 @@
             android:layout_weight="0.04"
             android:layout_height="250dp" />
 
+        <TextView
+            android:text="Tags: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tagsView"
+            android:layout_weight="0.04" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -66,10 +73,17 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/tag"
+            android:id="@+id/addTagButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Tag to Photo"
+            android:text="Add Tag"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/deleteTagButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Tag"
             android:layout_weight="1" />
 
 
