@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
@@ -36,6 +37,7 @@ public class AlbumSlideshow extends AppCompatActivity {
     Album album;
     User user;
     int index;
+    String path;
 
     Button movePhotoButton;
     Button nextPhotoButton;
@@ -60,6 +62,7 @@ public class AlbumSlideshow extends AppCompatActivity {
         album = user.getAlbum(getIntent().getStringExtra("album"));
         index = Integer.parseInt(getIntent().getStringExtra("photo"));
         Context context = getApplicationContext();
+        path = context.getFilesDir().getPath().toString() +  File.separator + "userData.dat";
 
         ImageView imageView = (ImageView) findViewById(R.id.slideshow_image_view);
         imageView.setImageBitmap(album.getPhoto(index).getBitmap());
@@ -134,8 +137,10 @@ public class AlbumSlideshow extends AppCompatActivity {
                         Photo p = album.getPhoto(index);
                         String newAlbum = String.valueOf(dropdown.getSelectedItem());
                         user.getAlbum(newAlbum).addPhoto(p);
-                        album.removePhoto(p);
+                        user.getAlbum(album.getName()).removePhoto(p);
                         dialog.dismiss();
+
+                        User.write(user, path);
 
                         Intent intent = new Intent(AlbumSlideshow.this, PhotoActivity.class);
                         intent.putExtra("album", newAlbum);

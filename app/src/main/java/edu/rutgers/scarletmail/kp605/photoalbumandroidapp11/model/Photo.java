@@ -11,7 +11,7 @@ import java.util.List;
 public class Photo implements Serializable {
 
     private static final long serialVersionUID = 473609096067308990L;
-    private Bitmap bitmap;
+    private transient Bitmap bitmap;
     private List<Tag> tags;
 
 

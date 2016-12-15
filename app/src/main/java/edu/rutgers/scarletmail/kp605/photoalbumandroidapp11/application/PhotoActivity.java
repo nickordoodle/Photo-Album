@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.IllegalFormatException;
@@ -25,10 +27,13 @@ import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Album;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Photo;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.User;
 
-public class PhotoActivity extends Activity {
+import static android.R.attr.path;
+
+public class PhotoActivity extends AppCompatActivity {
 
     Album album;
     User user;
+    String path;
 
     ListView photoListView;
     Button addPhotoButton;
@@ -51,6 +56,7 @@ public class PhotoActivity extends Activity {
         user = HomeActivity.user;
         album = user.getAlbum(getIntent().getStringExtra("album"));
         Context context = getApplicationContext();
+        path = context.getFilesDir().getPath().toString() +  File.separator + "userData.dat";
 
         initLayoutWidgets();
         setWidgetActions();
@@ -61,7 +67,7 @@ public class PhotoActivity extends Activity {
             e.printStackTrace();
         }
 
-        photoAdapter = new PhotoAdapter(PhotoActivity.this, context, photos, album, user);
+        photoAdapter = new PhotoAdapter(PhotoActivity.this, context, photos, album, user, path);
         photoListView.setAdapter(photoAdapter);
 
     }
@@ -92,9 +98,12 @@ public class PhotoActivity extends Activity {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
 
                         Photo photo = new Photo(bitmap);
-                        album.addPhoto(photo);
+                        user.getAlbum(album.getName()).addPhoto(photo);
+                        album = user.getAlbum(album.getName());
                         photos = album.getPhotos();
                         photoAdapter.notifyDataSetChanged();
+
+                        User.write(user, path);
 
                     } catch (IOException e)
                     {

@@ -34,12 +34,14 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
     private Album album;
     private User user;
     private Activity activity;
+    private String path;
 
-    public PhotoAdapter(Activity activity, Context context, List<Photo> photos, Album album, User user) {
+    public PhotoAdapter(Activity activity, Context context, List<Photo> photos, Album album, User user, String path) {
         super(context, photos);
         this.activity = activity;
         this.album = album;
         this.user = user;
+        this.path = path;
     }
 
     @Override
@@ -67,8 +69,11 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                album.removePhoto(data.get(position));
+                user.getAlbum(album.getName()).removePhoto(data.get(position));
+                album = user.getAlbum(album.getName());
                 notifyDataSetChanged();
+
+                User.write(user, path);
             }
         });
 

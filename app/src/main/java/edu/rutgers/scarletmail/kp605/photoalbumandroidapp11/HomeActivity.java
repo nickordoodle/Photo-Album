@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +26,12 @@ import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.adapters.*;
 
 
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends AppCompatActivity {
 
     Button createAlbumButton;
     ListView albumListView;
     View empty;
+    String path;
 
     public static User user;
     ArrayList<Album> albums;
@@ -49,36 +52,18 @@ public class HomeActivity extends Activity {
         setWidgetActions();
 
 
-        sharedPref = getSharedPreferences("UserLoginInfo",MODE_PRIVATE);
-        boolean hasRun = sharedPref.getBoolean("firstLogin", false);
-        if(!hasRun){
-            SharedPreferences.Editor prefEditor = sharedPref.edit();
-            prefEditor.putBoolean("firstLogin", true);
-            prefEditor.commit();
-
-            Log.d("sharedPref", "this is the first login");
+        path = getApplicationContext().getFilesDir().getPath().toString() +  File.separator + "userData.dat";
+        user = User.read(path);
+        if(user != null) {
+            albums = user.getAlbums();
         } else {
-
-            //get user data here and adjust adapter
-
-            //read in the user data
-            if(user == null){
-                user = new User("me");
-                albums = new ArrayList<Album>();
-            } else {
-                user = User.read();
-                albums = user.getAlbums();
-            }
-
-
-            Log.d("sharedPref", "this is NOT the first login");
-
+            user = new User("me");
+            albums = user.getAlbums();
         }
 
-
+        Log.d("path", path);
         albumAdapter = new AlbumAdapter(getApplicationContext(), albums);
         albumListView.setAdapter(albumAdapter);
-
 
     }
 
@@ -120,11 +105,11 @@ public class HomeActivity extends Activity {
 
                         List<Photo> emptyList = new ArrayList<Photo>();
                         Album newAlbum = new Album(value.getText().toString(), emptyList);
-                        albums.add(newAlbum);
+                        user.addAlbum(newAlbum);
+                        albums = user.getAlbums();
                         albumAdapter.notifyDataSetChanged();
 
-                        user.addAlbum(newAlbum);
-                        User.write(user);
+                        User.write(user, path);
 
                         dialog.dismiss();
 
@@ -183,10 +168,11 @@ public class HomeActivity extends Activity {
                     public void onClick(View v) {
 
                         String newAlbumName = value.getText().toString();
-                        album.setName(newAlbumName);
-                        albums.get(i).setName(newAlbumName);
+                        user.getAlbum(album.getName()).setName(newAlbumName);
+                        albums = user.getAlbums();
                         albumAdapter.notifyDataSetChanged();
-                        //Need a write operation here?
+
+                        User.write(user, path);
 
                         dialog.dismiss();
 
@@ -198,10 +184,11 @@ public class HomeActivity extends Activity {
                     public void onClick(View v) {
 
                         user.removeAlbum(album);
-                        albums.remove(i);
+                        albums = user.getAlbums();
                         albumAdapter.notifyDataSetChanged();
 
-                        //write operation?
+                        User.write(user, path);
+
                         dialog.dismiss();
 
                     }
