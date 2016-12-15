@@ -58,7 +58,7 @@ public class AlbumSlideshow extends AppCompatActivity {
 
     List<Photo> photos;
 
-    ArrayAdapter<Photo> photoAdapter;
+    ArrayAdapter<Photo> displayAdapter;
     private View.OnClickListener prevClickListener;
     private View.OnClickListener nextClickListener;
     private View.OnClickListener moveClickListener;
@@ -85,7 +85,7 @@ public class AlbumSlideshow extends AppCompatActivity {
         imageView.setImageBitmap(album.getPhoto(index).getBitmap());
 
         TextView textView = (TextView) findViewById(R.id.tagsView);
-        textView.setText(album.getPhoto(index).getTagsString());
+        textView.setText("Tags: " + album.getPhoto(index).getTagsString());
 
         initLayoutWidgets();
         setWidgetActions();
@@ -106,6 +106,8 @@ public class AlbumSlideshow extends AppCompatActivity {
         } else {
             nextPhotoButton.setEnabled(true);
         }
+
+        displayAdapter = new PhotoAdapter(AlbumSlideshow.this, context, photos, album, user, path);
     }
 
     @Override
@@ -141,7 +143,7 @@ public class AlbumSlideshow extends AppCompatActivity {
                 if(index > 0) {
                     index = index - 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
-                    textView.setText(album.getPhoto(index).getTagsString());
+                    textView.setText("Tags: " + album.getPhoto(index).getTagsString());
 
                     if(index == 0) {
                         prevPhotoButton.setEnabled(false);
@@ -162,7 +164,7 @@ public class AlbumSlideshow extends AppCompatActivity {
                 if(index < album.getAmountOfPhotos()-1) {
                     index = index + 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
-                    textView.setText(album.getPhoto(index).getTagsString());
+                    textView.setText("Tags: " + album.getPhoto(index).getTagsString());
 
                     if(index == 0) {
                         prevPhotoButton.setEnabled(false);
@@ -208,9 +210,9 @@ public class AlbumSlideshow extends AppCompatActivity {
                             album = user.getAlbum(album.getName());
                             photos = album.getPhotos();
 
-                            textView.setText(user.getAlbum(album.getName()).getPhoto(index).getTagsString());
+                            textView.setText("Tags: " + user.getAlbum(album.getName()).getPhoto(index).getTagsString());
                             User.write(user, path);
-
+                            displayAdapter.notifyDataSetChanged();
                             dialog.dismiss();
                         } else {
                             AlertDialog alertDialog = new AlertDialog.Builder(AlbumSlideshow.this).create();
@@ -267,8 +269,9 @@ public class AlbumSlideshow extends AppCompatActivity {
                         album = user.getAlbum(album.getName());
                         photos = album.getPhotos();
 
-                        textView.setText(user.getAlbum(album.getName()).getPhoto(index).getTagsString());
+                        textView.setText("Tags: " + user.getAlbum(album.getName()).getPhoto(index).getTagsString());
                         User.write(user, path);
+                        displayAdapter.notifyDataSetChanged();
 
                         dialog.dismiss();
 

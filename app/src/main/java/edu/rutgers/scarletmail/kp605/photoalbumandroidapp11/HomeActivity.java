@@ -54,6 +54,14 @@ public class HomeActivity extends AppCompatActivity {
         initLayoutWidgets();
         setWidgetActions();
 
+        if(albums != null) {
+            for(Album album : albums) {
+                if(album.getName().contains("Search__")) {
+                    user.getAlbums().remove(album);
+                    albums = user.getAlbums();
+                }
+            }
+        }
 
         path = getApplicationContext().getFilesDir().getPath().toString() +  File.separator + "userData.dat";
         user = User.read(path);
@@ -62,13 +70,6 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             user = new User("me");
             albums = user.getAlbums();
-        }
-
-        for(Album album : user.getAlbums()) {
-            if(album.getName().contains("Search__")) {
-                user.getAlbums().remove(album);
-                albums = user.getAlbums();
-            }
         }
 
         albumAdapter = new AlbumAdapter(getApplicationContext(), albums);

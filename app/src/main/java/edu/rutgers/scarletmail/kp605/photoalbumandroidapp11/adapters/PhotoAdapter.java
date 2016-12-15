@@ -60,11 +60,7 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
         ImageView imageView = (ImageView) vi.findViewById(R.id.photo_row_image_view);
         imageView.setImageBitmap(data.get(position).getBitmap());
 
-        if(album.getName().contains("Search__")) {
-            text.setText(data.get(position).getTagsString());
-        } else {
-            text.setText("");
-        }
+        text.setText(data.get(position).getTagsString());
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +77,17 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
 
                 notifyDataSetChanged();
                 User.write(user, path);
+            }
+        });
+
+        imageView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Context context = getContext();
+                Intent intent = new Intent(context, AlbumSlideshow.class);
+                intent.putExtra("photo", position + "");
+                intent.putExtra("album", album.getName());
+                context.startActivity(intent);
             }
         });
 
