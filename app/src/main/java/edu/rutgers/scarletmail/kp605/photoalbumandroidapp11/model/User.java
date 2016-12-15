@@ -55,7 +55,6 @@ public class User implements Serializable {
     public static User read(String path) {
         User u = null;
         try {
-            Log.d("File", "READ FILE");
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
             u = (User) ois.readObject();
             ois.close();
@@ -72,12 +71,10 @@ public class User implements Serializable {
             try {
                 File f = new File(path);
                 if(f.exists() && !f.isDirectory()) {
-                    Log.d("File", "WROTE FILE");
                     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
                     oos.writeObject(u);
                     oos.close();
                 } else {
-                    Log.d("File", "MADE FILE");
                     File file = new File(path);
                     file.createNewFile();
                 }

@@ -1,11 +1,14 @@
 package edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.application;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -76,6 +79,7 @@ public class AlbumSlideshow extends AppCompatActivity {
         index = Integer.parseInt(getIntent().getStringExtra("photo"));
         Context context = getApplicationContext();
         path = context.getFilesDir().getPath().toString() +  File.separator + "userData.dat";
+        setTitle("Album: " + album.getName());
 
         ImageView imageView = (ImageView) findViewById(R.id.slideshow_image_view);
         imageView.setImageBitmap(album.getPhoto(index).getBitmap());
@@ -92,8 +96,28 @@ public class AlbumSlideshow extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //photoAdapter = new PhotoAdapter(PhotoActivity.this, context, photos, album, user);
-        //photoListView.setAdapter(photoAdapter);
+        if(index == 0) {
+            prevPhotoButton.setEnabled(false);
+        } else {
+            prevPhotoButton.setEnabled(true);
+        }
+        if(index == album.getAmountOfPhotos()-1) {
+            nextPhotoButton.setEnabled(false);
+        } else {
+            nextPhotoButton.setEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+        if (id == android.R.id.home)
+        {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initLayoutWidgets(){
@@ -110,12 +134,25 @@ public class AlbumSlideshow extends AppCompatActivity {
 
         imageView = (ImageView) findViewById(R.id.slideshow_image_view);
 
+        textView = (TextView) findViewById(R.id.tagsView);
+
         prevClickListener = new View.OnClickListener() {
             public void onClick(View v) {
                 if(index > 0) {
                     index = index - 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
                     textView.setText(album.getPhoto(index).getTagsString());
+
+                    if(index == 0) {
+                        prevPhotoButton.setEnabled(false);
+                    } else {
+                        prevPhotoButton.setEnabled(true);
+                    }
+                    if(index == album.getAmountOfPhotos()-1) {
+                        nextPhotoButton.setEnabled(false);
+                    } else {
+                        nextPhotoButton.setEnabled(true);
+                    }
                 }
             }
         };
@@ -126,6 +163,17 @@ public class AlbumSlideshow extends AppCompatActivity {
                     index = index + 1;
                     imageView.setImageBitmap(album.getPhoto(index).getBitmap());
                     textView.setText(album.getPhoto(index).getTagsString());
+
+                    if(index == 0) {
+                        prevPhotoButton.setEnabled(false);
+                    } else {
+                        prevPhotoButton.setEnabled(true);
+                    }
+                    if(index == album.getAmountOfPhotos()-1) {
+                        nextPhotoButton.setEnabled(false);
+                    } else {
+                        nextPhotoButton.setEnabled(true);
+                    }
                 }
             }
         };
@@ -155,18 +203,27 @@ public class AlbumSlideshow extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Tag tag = new Tag(String.valueOf(dropdown.getSelectedItem()), value.getText().toString());
-                        user.getAlbum(album.getName()).getPhoto(index).addTag(tag);
-                        album = user.getAlbum(album.getName());
-                        photos = album.getPhotos();
+                        if(!user.getAlbum(album.getName()).getPhoto(index).hasTag(tag)) {
+                            user.getAlbum(album.getName()).getPhoto(index).addTag(tag);
+                            album = user.getAlbum(album.getName());
+                            photos = album.getPhotos();
 
-                        User.write(user, path);
+                            textView.setText(user.getAlbum(album.getName()).getPhoto(index).getTagsString());
+                            User.write(user, path);
 
-                        dialog.dismiss();
-                        Context context = getApplicationContext();
-                        Intent intent = new Intent(context, AlbumSlideshow.class);
-                        intent.putExtra("photo", index + "");
-                        intent.putExtra("album", album.getName());
-                        context.startActivity(intent);
+                            dialog.dismiss();
+                        } else {
+                            AlertDialog alertDialog = new AlertDialog.Builder(AlbumSlideshow.this).create();
+                            alertDialog.setTitle("Error");
+                            alertDialog.setMessage("Photo has this tag already");
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
 
                     }
                 });
@@ -210,14 +267,10 @@ public class AlbumSlideshow extends AppCompatActivity {
                         album = user.getAlbum(album.getName());
                         photos = album.getPhotos();
 
+                        textView.setText(user.getAlbum(album.getName()).getPhoto(index).getTagsString());
                         User.write(user, path);
 
                         dialog.dismiss();
-                        Context context = getApplicationContext();
-                        Intent intent = new Intent(context, AlbumSlideshow.class);
-                        intent.putExtra("photo", index + "");
-                        intent.putExtra("album", album.getName());
-                        context.startActivity(intent);
 
                     }
                 });

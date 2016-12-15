@@ -1,6 +1,8 @@
 package edu.rutgers.scarletmail.kp605.photoalbumandroidapp11;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.User;
 
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.adapters.*;
 
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.deleteButton;
 
 
 public class HomeActivity extends AppCompatActivity {
@@ -61,7 +64,13 @@ public class HomeActivity extends AppCompatActivity {
             albums = user.getAlbums();
         }
 
-        Log.d("path", path);
+        for(Album album : user.getAlbums()) {
+            if(album.getName().contains("Search__")) {
+                user.getAlbums().remove(album);
+                albums = user.getAlbums();
+            }
+        }
+
         albumAdapter = new AlbumAdapter(getApplicationContext(), albums);
         albumListView.setAdapter(albumAdapter);
 
@@ -102,16 +111,26 @@ public class HomeActivity extends AppCompatActivity {
                 addButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        List<Photo> emptyList = new ArrayList<Photo>();
-                        Album newAlbum = new Album(value.getText().toString(), emptyList);
-                        user.addAlbum(newAlbum);
-                        albums = user.getAlbums();
-                        albumAdapter.notifyDataSetChanged();
-
-                        User.write(user, path);
-
-                        dialog.dismiss();
+                        if(user.getAlbum(value.getText().toString()) == null) {
+                            List<Photo> emptyList = new ArrayList<Photo>();
+                            Album newAlbum = new Album(value.getText().toString(), emptyList);
+                            user.addAlbum(newAlbum);
+                            albums = user.getAlbums();
+                            albumAdapter.notifyDataSetChanged();
+                            User.write(user, path);
+                            dialog.dismiss();
+                        } else {
+                            AlertDialog alertDialog = new AlertDialog.Builder(HomeActivity.this).create();
+                            alertDialog.setTitle("Error");
+                            alertDialog.setMessage("Album exists with this name");
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
 
                     }
                 });
@@ -166,15 +185,25 @@ public class HomeActivity extends AppCompatActivity {
                 saveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        String newAlbumName = value.getText().toString();
-                        user.getAlbum(album.getName()).setName(newAlbumName);
-                        albums = user.getAlbums();
-                        albumAdapter.notifyDataSetChanged();
-
-                        User.write(user, path);
-
-                        dialog.dismiss();
+                        if(user.getAlbum(value.getText().toString()) == null) {
+                            String newAlbumName = value.getText().toString();
+                            user.getAlbum(album.getName()).setName(newAlbumName);
+                            albums = user.getAlbums();
+                            albumAdapter.notifyDataSetChanged();
+                            User.write(user, path);
+                            dialog.dismiss();
+                        } else {
+                            AlertDialog alertDialog = new AlertDialog.Builder(HomeActivity.this).create();
+                            alertDialog.setTitle("Error");
+                            alertDialog.setMessage("Album exists with this name");
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
 
                     }
                 });

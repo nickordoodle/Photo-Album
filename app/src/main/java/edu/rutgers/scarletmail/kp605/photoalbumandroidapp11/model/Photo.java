@@ -11,17 +11,17 @@ import java.util.List;
 public class Photo implements Serializable {
 
     private static final long serialVersionUID = 473609096067308990L;
-    private transient Bitmap bitmap;
+    private SerializableBitmap bitmap;
     private List<Tag> tags;
 
 
     public Photo(Bitmap bitmap) {
-        this.bitmap = bitmap;
+        this.bitmap = new SerializableBitmap(bitmap);
         tags = new ArrayList<Tag>();
 
     }
 
-    public Bitmap getBitmap() { return bitmap; }
+    public Bitmap getBitmap() { return bitmap.getCurrentImage(); }
 
     public List<Tag> getTags() {
         return tags;
@@ -29,14 +29,6 @@ public class Photo implements Serializable {
 
     public void addTag(Tag tag) {
         tags.add(tag);
-    }
-
-    public void removeTag(String type, String value) {
-        for(Tag tag : tags) {
-            if(tag.getType().equals(type) && tag.getValue().equals(value)) {
-                tags.remove(tag);
-            }
-        }
     }
 
     public void removeTag(Tag tag) {
@@ -65,19 +57,10 @@ public class Photo implements Serializable {
 		}
 	}*/
 
-    public boolean hasTag(String tag) {
-        tag = tag.trim();
-        String[] types = tag.split(":");
-        String[] values = tag.split(" ");
-        String type = "", value = "";
-        if(types.length == 2) {
-            type = types[0];
-        }
-        if(values.length == 2) {
-            value = types[1];
-        }
+    public boolean hasTag(Tag tag) {
         for(Tag t : tags) {
-            if(type.trim().equals(t.getType()) && value.trim().equals(t.getValue())) {
+            if(t.getValue().toLowerCase().equals(tag.getValue().toLowerCase())
+                    && t.getType().toLowerCase().equals(tag.getType().toLowerCase())){
                 return true;
             }
         }

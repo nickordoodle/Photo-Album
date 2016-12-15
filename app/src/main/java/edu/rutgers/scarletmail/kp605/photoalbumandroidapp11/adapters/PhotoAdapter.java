@@ -60,19 +60,26 @@ public class PhotoAdapter extends GenericArrayAdapter<Photo> {
         ImageView imageView = (ImageView) vi.findViewById(R.id.photo_row_image_view);
         imageView.setImageBitmap(data.get(position).getBitmap());
 
-        String caption = data.get(position).getTagsString();
-        if(caption != null)
+        if(album.getName().contains("Search__")) {
             text.setText(data.get(position).getTagsString());
-        else
-            text.setText("No caption");
+        } else {
+            text.setText("");
+        }
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                user.getAlbum(album.getName()).removePhoto(data.get(position));
-                album = user.getAlbum(album.getName());
-                notifyDataSetChanged();
+                if(album.getName().contains("Search__")) {
+                    String name = album.getName().substring(8);
+                    user.getAlbum(name).removePhoto(data.get(position));
+                    user.getAlbum(album.getName()).removePhoto(data.get(position));
+                    album = user.getAlbum(name);
+                } else {
+                    user.getAlbum(album.getName()).removePhoto(data.get(position));
+                    album = user.getAlbum(album.getName());
+                }
 
+                notifyDataSetChanged();
                 User.write(user, path);
             }
         });

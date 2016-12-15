@@ -1,6 +1,7 @@
 package edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.application;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,10 +14,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.IllegalFormatException;
 
@@ -25,9 +29,12 @@ import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.adapters.PhotoAdapter;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Album;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Photo;
+import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.Tag;
 import edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.model.User;
 
 import static android.R.attr.path;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.albumName;
+import static edu.rutgers.scarletmail.kp605.photoalbumandroidapp11.R.id.deleteButton;
 
 public class PhotoActivity extends AppCompatActivity {
 
@@ -37,11 +44,13 @@ public class PhotoActivity extends AppCompatActivity {
 
     ListView photoListView;
     Button addPhotoButton;
+    Button searchPhotosButton;
 
     List<Photo> photos;
 
     ArrayAdapter<Photo> photoAdapter;
     private View.OnClickListener addPhotoListener;
+    private View.OnClickListener searchPhotosListener;
     private AdapterView.OnItemClickListener itemClickListener;
 
     View empty;
@@ -57,6 +66,7 @@ public class PhotoActivity extends AppCompatActivity {
         album = user.getAlbum(getIntent().getStringExtra("album"));
         Context context = getApplicationContext();
         path = context.getFilesDir().getPath().toString() +  File.separator + "userData.dat";
+        setTitle("Album: " + album.getName());
 
         initLayoutWidgets();
         setWidgetActions();
@@ -69,6 +79,11 @@ public class PhotoActivity extends AppCompatActivity {
 
         photoAdapter = new PhotoAdapter(PhotoActivity.this, context, photos, album, user, path);
         photoListView.setAdapter(photoAdapter);
+
+        if(album.getName().split("__").length > 0 && album.getName().split("__")[0].equals("Search")) {
+            addPhotoButton.setEnabled(false);
+            searchPhotosButton.setEnabled(false);
+        }
 
     }
 
@@ -121,6 +136,8 @@ public class PhotoActivity extends AppCompatActivity {
 
         addPhotoButton = (Button) findViewById(R.id.addPhotoButton);
 
+        searchPhotosButton = (Button) findViewById(R.id.searchPhotosButton);
+
         photoListView = (ListView) findViewById(R.id.list);
 
         empty = findViewById(R.id.empty);
@@ -135,11 +152,73 @@ public class PhotoActivity extends AppCompatActivity {
             }
         };
 
+        searchPhotosListener = new View.OnClickListener() {
+            public void onClick(View v) {
+
+                final Dialog dialog = new Dialog(PhotoActivity.this);
+                dialog.setContentView(R.layout.search_photos_dialog);
+                dialog.setTitle("Search Photos");
+
+                Button searchButton = (Button) dialog.findViewById(R.id.searchButton);
+                Button cancelButton = (Button) dialog.findViewById(R.id.cancelButton);
+                final Spinner dropdown = (Spinner) dialog.findViewById(R.id.spinner);
+                final EditText value = (EditText) dialog.findViewById(R.id.searchText);
+
+                List<String> list = new ArrayList<String>();
+                list.add("location");
+                list.add("person");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(PhotoActivity.this, android.R.layout.simple_spinner_item, list);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                dropdown.setAdapter(adapter);
+
+                // if button is clicked, close the custom dialog
+                searchButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String type = String.valueOf(dropdown.getSelectedItem());
+                        String val = value.getText().toString();
+
+                        List<Photo> searchResults = new ArrayList<Photo>();
+                        for(Photo p : album.getPhotos()) {
+                            for(Tag tag : p.getTags()) {
+                                if(tag.getType().toLowerCase().equals(type.toLowerCase())
+                                        && tag.getValue().toLowerCase().contains(val.toLowerCase())) {
+                                    searchResults.add(p);
+                                }
+                            }
+                        }
+
+                        Album a = new Album("Search__" + album.getName() , searchResults);
+                        user.addAlbum(a);
+                        dialog.dismiss();
+
+                        Intent intent = new Intent(PhotoActivity.this, PhotoActivity.class);
+                        intent.putExtra("album", a.getName());
+                        startActivity(intent);
+
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        dialog.dismiss();
+
+                    }
+                });
+
+                dialog.show();
+            }
+        };
+
     }
 
     private void setWidgetActions(){
 
         addPhotoButton.setOnClickListener(addPhotoListener);
+        searchPhotosButton.setOnClickListener(searchPhotosListener);
 
         photoListView.setOnItemClickListener(itemClickListener);
 
